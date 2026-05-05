@@ -1,0 +1,83 @@
+package com.integrador.Turismo.Controller;
+
+import com.integrador.Turismo.Model.Usuario;
+import com.integrador.Turismo.Repository.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/usuarios")
+@RequiredArgsConstructor
+public class UsuarioController {
+    private final UsuarioRepository usuarioRepository;
+
+    // GET /api/usuarios/perfil
+    // El cliente ve y puede actualizar su propio perfil
+    @GetMapping("/perfil")
+    public ResponseEntity<Usuario> perfil(@AuthenticationPrincipal Usuario usuario) {
+        return ResponseEntity.ok(usuario);
+    }
+
+    // PUT /api/usuarios/perfil
+    // Actualiza datos personales del usuario logueado
+    @PutMapping("/perfil")
+    public ResponseEntity<Usuario> actualizarPerfil(
+            @AuthenticationPrincipal Usuario usuario,
+            @RequestBody Usuario datos) {
+
+        usuario.setNombreCompleto(datos.getNombreCompleto());
+        usuario.setTelefono(datos.getTelefono());
+        usuario.setDniPasaporte(datos.getDniPasaporte());
+        usuario.setPais(datos.getPais());
+        usuario.setFechaNacimiento(datos.getFechaNacimiento());
+        usuario.setGenero(datos.getGenero());
+
+        return ResponseEntity.ok(usuarioRepository.save(usuario));
+    }
+
+    // ── Solo ADMIN ────────────────────────────────────────────
+
+    // GET /api/usuarios
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Usuario>> listar() {
+        return ResponseEntity.ok(usuarioRepository.findAll());
+    }
+
+    // GET /api/usuarios/{id}
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Usuario> obtener(@PathVariable String id) {
+        return usuarioRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // PATCH /api/usuarios/{id}/rol
+    // Admin cambia el rol de un usuario
+    // Body: "ADMIN" | "CLIENTE"
+    @PatchMapping("/{id}/rol")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Usuario> cambiarRol(
+            @PathVariable String id,
+            @RequestBody Usuario.Rol nuevoRol) {
+
+        return usuarioRepository.findById(id).map(u -> {
+            u.setRol(nuevoRol);
+            return ResponseEntity.ok(usuarioRepository.save(u));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // DELETE /api/usuarios/{id}
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> eliminar(@PathVariable String id) {
+        usuarioRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}
