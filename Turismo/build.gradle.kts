@@ -34,6 +34,9 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
+	//firebase
+	implementation("com.google.firebase:firebase-admin:9.3.0")
+
 	testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testCompileOnly("org.projectlombok:lombok")
