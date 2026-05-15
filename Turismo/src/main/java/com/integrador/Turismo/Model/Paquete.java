@@ -84,7 +84,7 @@ public class Paquete {
 
     // Itinerario por días
     @OneToMany(mappedBy = "paquete", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("diaDumero ASC")
+    @OrderBy("diaNumero ASC")
     @Builder.Default
     private List<Itinerariodia> itinerario = new ArrayList<>();
 

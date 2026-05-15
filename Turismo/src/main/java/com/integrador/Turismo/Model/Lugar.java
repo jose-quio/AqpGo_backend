@@ -1,4 +1,5 @@
 package com.integrador.Turismo.Model;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -26,6 +27,7 @@ public class Lugar {
     private String region;
 
     // Relación inversa — no se mapea a columna
+    @JsonIgnore
     @ManyToMany(mappedBy = "lugares")
     @Builder.Default
     private List<Paquete> paquetes = new ArrayList<>();
