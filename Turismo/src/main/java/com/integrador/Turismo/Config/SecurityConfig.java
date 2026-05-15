@@ -50,9 +50,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()          // login, register
                         .requestMatchers("/api/paquetes/**").permitAll()      // ver tours sin login
                         .requestMatchers("/api/lugares/**").permitAll()       // ver lugares
+                        .requestMatchers("/api/usuarios/perfil").authenticated()
 
                         // ── Solo ADMIN ────────────────────────────────────────
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+
 
                         // ── Cualquier autenticado ─────────────────────────────
                         .anyRequest().authenticated()

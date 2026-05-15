@@ -1,5 +1,6 @@
 package com.integrador.Turismo.Controller;
 
+import com.integrador.Turismo.DTO.ActualizarPerfilRequest;
 import com.integrador.Turismo.Model.Usuario;
 import com.integrador.Turismo.Repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/usuarios")
@@ -26,18 +28,23 @@ public class UsuarioController {
     // PUT /api/usuarios/perfil
     // Actualiza datos personales del usuario logueado
     @PutMapping("/perfil")
-    public ResponseEntity<Usuario> actualizarPerfil(
+    public ResponseEntity<Map<String, String>> actualizarPerfil(
             @AuthenticationPrincipal Usuario usuario,
-            @RequestBody Usuario datos) {
+            @RequestBody ActualizarPerfilRequest datos) {
 
-        usuario.setNombreCompleto(datos.getNombreCompleto());
-        usuario.setTelefono(datos.getTelefono());
-        usuario.setDniPasaporte(datos.getDniPasaporte());
-        usuario.setPais(datos.getPais());
-        usuario.setFechaNacimiento(datos.getFechaNacimiento());
-        usuario.setGenero(datos.getGenero());
+        if (datos.telefono() != null)     usuario.setTelefono(datos.telefono());
+        if (datos.dniPasaporte() != null) usuario.setDniPasaporte(datos.dniPasaporte());
+        if (datos.pais() != null)         usuario.setPais(datos.pais());
+        if (datos.genero() != null)       usuario.setGenero(datos.genero());
 
-        return ResponseEntity.ok(usuarioRepository.save(usuario));
+        usuarioRepository.save(usuario);
+
+        // Devuelve solo los datos actualizados, sin password
+        return ResponseEntity.ok(Map.of(
+                "mensaje",       "Perfil actualizado correctamente",
+                "dniPasaporte",  usuario.getDniPasaporte() != null ? usuario.getDniPasaporte() : "",
+                "telefono",      usuario.getTelefono() != null ? usuario.getTelefono() : ""
+        ));
     }
 
     // ── Solo ADMIN ────────────────────────────────────────────

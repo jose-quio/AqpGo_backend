@@ -2,6 +2,7 @@ package com.integrador.Turismo.Service;
 
 import com.integrador.Turismo.DTO.AcompananteDto;
 import com.integrador.Turismo.DTO.ReservaRequest;
+import com.integrador.Turismo.DTO.ReservaResponse;
 import com.integrador.Turismo.Model.*;
 import com.integrador.Turismo.Repository.*;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class ReservaService {
 
     // Cliente — crear reserva
     @Transactional
-    public Reserva crear(ReservaRequest req, String usuarioId) {
+    public ReservaResponse crear(ReservaRequest req, String usuarioId) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
@@ -30,7 +31,6 @@ public class ReservaService {
             throw new IllegalStateException("El paquete no está disponible");
         }
 
-        // Precio total = precio base * número de personas
         Reserva reserva = Reserva.builder()
                 .usuario(usuario)
                 .paquete(paquete)
@@ -41,7 +41,6 @@ public class ReservaService {
                 .estado(Reserva.Estado.PENDIENTE_PAGO)
                 .build();
 
-        // Agregar acompañantes si los hay
         if (req.acompanantes() != null) {
             for (AcompananteDto dto : req.acompanantes()) {
                 Acompanante a = Acompanante.builder()
@@ -57,35 +56,43 @@ public class ReservaService {
             }
         }
 
-        return reservaRepository.save(reserva);
+        return ReservaResponse.from(reservaRepository.save(reserva));
     }
 
     // Cliente — mis reservas
-    public List<Reserva> misReservas(String usuarioId) {
-        return reservaRepository.findByUsuarioId(usuarioId);
+    public List<ReservaResponse> misReservas(String usuarioId) {
+        return reservaRepository.findByUsuarioId(usuarioId)
+                .stream().map(ReservaResponse::from).toList();
     }
 
     // Cliente/Admin — detalle de una reserva
-    public Reserva obtenerPorId(String id) {
-        return reservaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+    public ReservaResponse obtenerPorId(String id) {
+        return ReservaResponse.from(
+                reservaRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Reserva no encontrada"))
+        );
     }
 
     // Admin — todas las reservas
-    public List<Reserva> listarTodas() {
-        return reservaRepository.findAll();
+    public List<ReservaResponse> listarTodas() {
+        return reservaRepository.findAll()
+                .stream().map(ReservaResponse::from).toList();
     }
 
     // Admin — cambiar estado manualmente
-    public Reserva cambiarEstado(String id, Reserva.Estado nuevoEstado) {
-        Reserva reserva = obtenerPorId(id);
+    @Transactional
+    public ReservaResponse cambiarEstado(String id, Reserva.Estado nuevoEstado) {
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
         reserva.setEstado(nuevoEstado);
-        return reservaRepository.save(reserva);
+        return ReservaResponse.from(reservaRepository.save(reserva));
     }
 
     // Cliente — cancelar su propia reserva
-    public Reserva cancelar(String id, String usuarioId) {
-        Reserva reserva = obtenerPorId(id);
+    @Transactional
+    public ReservaResponse cancelar(String id, String usuarioId) {
+        Reserva reserva = reservaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
         if (!reserva.getUsuario().getId().equals(usuarioId)) {
             throw new SecurityException("No tienes permiso para cancelar esta reserva");
         }
@@ -93,6 +100,6 @@ public class ReservaService {
             throw new IllegalStateException("No se puede cancelar una reserva completada");
         }
         reserva.setEstado(Reserva.Estado.CANCELADA);
-        return reservaRepository.save(reserva);
+        return ReservaResponse.from(reservaRepository.save(reserva));
     }
 }

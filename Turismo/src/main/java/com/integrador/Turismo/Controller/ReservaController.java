@@ -1,6 +1,7 @@
 package com.integrador.Turismo.Controller;
 
 import com.integrador.Turismo.DTO.ReservaRequest;
+import com.integrador.Turismo.DTO.ReservaResponse;
 import com.integrador.Turismo.Model.Reserva;
 import com.integrador.Turismo.Model.Usuario;
 import com.integrador.Turismo.Service.ReservaService;
@@ -24,7 +25,7 @@ public class ReservaController {
     // POST /api/reservas
     // El usuario logueado crea su propia reserva
     @PostMapping
-    public ResponseEntity<Reserva> crear(
+    public ResponseEntity<ReservaResponse> crear(
             @Valid @RequestBody ReservaRequest req,
             @AuthenticationPrincipal Usuario usuario) {
         return ResponseEntity.ok(reservaService.crear(req, usuario.getId()));
@@ -33,7 +34,7 @@ public class ReservaController {
     // GET /api/reservas/mis-reservas
     // El cliente ve solo sus reservas
     @GetMapping("/mis-reservas")
-    public ResponseEntity<List<Reserva>> misReservas(
+    public ResponseEntity<List<ReservaResponse>> misReservas(
             @AuthenticationPrincipal Usuario usuario) {
         return ResponseEntity.ok(reservaService.misReservas(usuario.getId()));
     }
@@ -41,14 +42,14 @@ public class ReservaController {
     // GET /api/reservas/{id}
     // Cliente ve el detalle de una de sus reservas
     @GetMapping("/{id}")
-    public ResponseEntity<Reserva> detalle(@PathVariable String id) {
+    public ResponseEntity<ReservaResponse> detalle(@PathVariable String id) {
         return ResponseEntity.ok(reservaService.obtenerPorId(id));
     }
 
     // PATCH /api/reservas/{id}/cancelar
     // El cliente cancela su propia reserva
     @PatchMapping("/{id}/cancelar")
-    public ResponseEntity<Reserva> cancelar(
+    public ResponseEntity<ReservaResponse> cancelar(
             @PathVariable String id,
             @AuthenticationPrincipal Usuario usuario) {
         return ResponseEntity.ok(reservaService.cancelar(id, usuario.getId()));
@@ -60,7 +61,7 @@ public class ReservaController {
     // Admin ve todas las reservas
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<Reserva>> listarTodas() {
+    public ResponseEntity<List<ReservaResponse>> listarTodas() {
         return ResponseEntity.ok(reservaService.listarTodas());
     }
 
@@ -69,7 +70,7 @@ public class ReservaController {
     // Body: "CONFIRMADA" | "CANCELADA" | "COMPLETADA" | "PENDIENTE_PAGO"
     @PatchMapping("/{id}/estado")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Reserva> cambiarEstado(
+    public ResponseEntity<ReservaResponse> cambiarEstado(
             @PathVariable String id,
             @RequestBody Reserva.Estado nuevoEstado) {
         return ResponseEntity.ok(reservaService.cambiarEstado(id, nuevoEstado));
