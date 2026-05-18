@@ -1,5 +1,6 @@
 package com.integrador.Turismo.Controller;
 
+import com.integrador.Turismo.DTO.ReservaEstadoRequest;
 import com.integrador.Turismo.DTO.ReservaRequest;
 import com.integrador.Turismo.DTO.ReservaResponse;
 import com.integrador.Turismo.Model.Reserva;
@@ -7,12 +8,14 @@ import com.integrador.Turismo.Model.Usuario;
 import com.integrador.Turismo.Service.ReservaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reservas")
@@ -70,9 +73,14 @@ public class ReservaController {
     // Body: "CONFIRMADA" | "CANCELADA" | "COMPLETADA" | "PENDIENTE_PAGO"
     @PatchMapping("/{id}/estado")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ReservaResponse> cambiarEstado(
-            @PathVariable String id,
-            @RequestBody Reserva.Estado nuevoEstado) {
-        return ResponseEntity.ok(reservaService.cambiarEstado(id, nuevoEstado));
+    public ResponseEntity<?> cambiarEstado(@PathVariable String id, @RequestBody ReservaEstadoRequest req) {
+        try {
+            return ResponseEntity.ok(reservaService.cambiarEstado(id, req.estado()));
+        } catch (Exception e) {
+            e.printStackTrace(); // Esto imprimirá el stack trace en la consola del backend
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getClass().getName(), "message", e.getMessage()));
+        }
     }
 }

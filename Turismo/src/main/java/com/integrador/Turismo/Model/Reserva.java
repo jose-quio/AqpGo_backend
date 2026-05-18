@@ -29,7 +29,6 @@ public class Reserva {
 
     @Column(name = "fecha_salida", nullable = false)
     @NotNull
-    @Future
     private LocalDate fechaSalida;
 
     @Column(name = "num_personas", nullable = false)
