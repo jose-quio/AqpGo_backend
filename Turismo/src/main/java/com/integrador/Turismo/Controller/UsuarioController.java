@@ -1,8 +1,12 @@
 package com.integrador.Turismo.Controller;
 
 import com.integrador.Turismo.DTO.ActualizarPerfilRequest;
+import com.integrador.Turismo.DTO.AuthResponse;
+import com.integrador.Turismo.DTO.RegisterRequest;
 import com.integrador.Turismo.Model.Usuario;
 import com.integrador.Turismo.Repository.UsuarioRepository;
+import com.integrador.Turismo.Service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +21,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UsuarioController {
     private final UsuarioRepository usuarioRepository;
+    private final AuthService authService;
 
     // GET /api/usuarios/perfil
     // El cliente ve y puede actualizar su propio perfil
@@ -86,5 +91,11 @@ public class UsuarioController {
     public ResponseEntity<Void> eliminar(@PathVariable String id) {
         usuarioRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // POST /api/usuarios/register
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest req) {
+        return ResponseEntity.ok(authService.registerAdmin(req));
     }
 }

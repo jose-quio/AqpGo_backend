@@ -50,6 +50,13 @@ public class PaqueteController {
         return ResponseEntity.ok(paqueteService.actualizar(id, dto));
     }
 
+    @GetMapping("/editar/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<PaqueteDetalleDto> verpaqueteadmin(
+            @PathVariable String id) {
+        return ResponseEntity.ok(paqueteService.obtenerDetalle(id));
+    }
+
     // PATCH /api/paquetes/{id}/toggle  →  activar/desactivar
     @PatchMapping("/{id}/toggle")
     @PreAuthorize("hasRole('ADMIN')")
