@@ -39,6 +39,26 @@ public class AuthService {
                 usuario.getNombreCompleto(), usuario.getRol().name());
     }
 
+    public AuthResponse registerAdmin(RegisterRequest req) {
+        if (usuarioRepository.existsByEmail(req.email())) {
+            throw new IllegalArgumentException("El email ya está registrado");
+        }
+
+        Usuario usuario = Usuario.builder()
+                .nombreCompleto(req.nombreCompleto())
+                .email(req.email())
+                .password(passwordEncoder.encode(req.password()))
+                .telefono(req.telefono())
+                .rol(Usuario.Rol.ADMIN)
+                .build();
+
+        usuarioRepository.save(usuario);
+
+        String token = jwtService.generateToken(usuario);
+        return new AuthResponse(token, usuario.getEmail(),
+                usuario.getNombreCompleto(), usuario.getRol().name());
+    }
+
     public AuthResponse login(LoginRequest req) {
         // Lanza excepción si credenciales incorrectas
         authManager.authenticate(

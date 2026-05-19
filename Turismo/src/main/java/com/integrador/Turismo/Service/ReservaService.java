@@ -6,6 +6,7 @@ import com.integrador.Turismo.DTO.ReservaResponse;
 import com.integrador.Turismo.Model.*;
 import com.integrador.Turismo.Repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReservaService {
     private final ReservaRepository reservaRepository;
     private final PaqueteRepository paqueteRepository;
@@ -82,9 +84,12 @@ public class ReservaService {
     // Admin — cambiar estado manualmente
     @Transactional
     public ReservaResponse cambiarEstado(String id, Reserva.Estado nuevoEstado) {
+        log.info("Cambiando estado de reserva {} a {}", id, nuevoEstado);
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+        log.info("Reserva encontrada: {}", reserva);
         reserva.setEstado(nuevoEstado);
+        log.info("Guardado exitoso");
         return ReservaResponse.from(reservaRepository.save(reserva));
     }
 

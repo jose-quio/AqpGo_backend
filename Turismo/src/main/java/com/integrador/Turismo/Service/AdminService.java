@@ -1,8 +1,7 @@
 package com.integrador.Turismo.Service;
 
-import com.integrador.Turismo.DTO.ActividadRecienteDto;
-import com.integrador.Turismo.DTO.PaqueteAdminDto;
-import com.integrador.Turismo.DTO.StatsDto;
+import com.integrador.Turismo.DTO.*;
+import com.integrador.Turismo.Model.Pago;
 import com.integrador.Turismo.Model.Reserva;
 import com.integrador.Turismo.Repository.*;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +20,7 @@ public class AdminService {
     private final ReservaRepository   reservaRepository;
     private final UsuarioRepository   usuarioRepository;
     private final ProveedorRepository proveedorRepository;
+    private final PagoRepository pagoRepository;
 
     // ── Stats generales del dashboard ────────────────────────
     public StatsDto getStats() {
@@ -86,5 +86,27 @@ public class AdminService {
 
             return PaqueteAdminDto.from(paquete, totalReservas, ingresos);
         }).toList();
+    }
+
+    public List<PagoAdminDto> getPagosAdmin() {
+        return pagoRepository.findAll(Sort.by(Sort.Direction.DESC, "fechaPago"))
+                .stream()
+                .map(PagoAdminDto::from)
+                .toList();
+    }
+
+    public PagoStatsDto getPagoStats() {
+        List<Pago> todos = pagoRepository.findAll();
+
+        long verificados  = todos.stream().filter(p -> p.getEstado() == Pago.Estado.VERIFICADO).count();
+        long pendientes   = todos.stream().filter(p -> p.getEstado() == Pago.Estado.PENDIENTE).count();
+        long rechazados   = todos.stream().filter(p -> p.getEstado() == Pago.Estado.RECHAZADO).count();
+
+        BigDecimal montoTotal = todos.stream()
+                .filter(p -> p.getEstado() == Pago.Estado.VERIFICADO)
+                .map(Pago::getMonto)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new PagoStatsDto(todos.size(), verificados, pendientes, rechazados, montoTotal);
     }
 }
