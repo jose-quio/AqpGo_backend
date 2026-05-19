@@ -89,7 +89,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
                 "http://localhost:3000",          // Next.js dev
-                "https://tu-proyecto.vercel.app"  // Cambia por tu URL de Vercel
+                "https://proyecto-integrador-chi-ten.vercel.app/"  // Cambia por tu URL de Vercel
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
