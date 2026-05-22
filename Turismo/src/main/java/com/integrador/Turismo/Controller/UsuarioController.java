@@ -3,6 +3,7 @@ package com.integrador.Turismo.Controller;
 import com.integrador.Turismo.DTO.ActualizarPerfilRequest;
 import com.integrador.Turismo.DTO.AuthResponse;
 import com.integrador.Turismo.DTO.RegisterRequest;
+import com.integrador.Turismo.DTO.UsuarioResponse;
 import com.integrador.Turismo.Model.Usuario;
 import com.integrador.Turismo.Repository.UsuarioRepository;
 import com.integrador.Turismo.Service.AuthService;
@@ -33,23 +34,27 @@ public class UsuarioController {
     // PUT /api/usuarios/perfil
     // Actualiza datos personales del usuario logueado
     @PutMapping("/perfil")
-    public ResponseEntity<Map<String, String>> actualizarPerfil(
+    public ResponseEntity<UsuarioResponse> actualizarPerfil(
             @AuthenticationPrincipal Usuario usuario,
             @RequestBody ActualizarPerfilRequest datos) {
 
-        if (datos.telefono() != null)     usuario.setTelefono(datos.telefono());
-        if (datos.dniPasaporte() != null) usuario.setDniPasaporte(datos.dniPasaporte());
-        if (datos.pais() != null)         usuario.setPais(datos.pais());
-        if (datos.genero() != null)       usuario.setGenero(datos.genero());
+        if (datos.nombreCompleto() != null && !datos.nombreCompleto().isBlank())
+            usuario.setNombreCompleto(datos.nombreCompleto());
+        if (datos.telefono() != null)
+            usuario.setTelefono(datos.telefono());
+        if (datos.dniPasaporte() != null)
+            usuario.setDniPasaporte(datos.dniPasaporte());
+        if (datos.pais() != null)
+            usuario.setPais(datos.pais());
+        if (datos.fechaNacimiento() != null)
+            usuario.setFechaNacimiento(datos.fechaNacimiento());
+        if (datos.genero() != null)
+            usuario.setGenero(datos.genero());
 
         usuarioRepository.save(usuario);
 
-        // Devuelve solo los datos actualizados, sin password
-        return ResponseEntity.ok(Map.of(
-                "mensaje",       "Perfil actualizado correctamente",
-                "dniPasaporte",  usuario.getDniPasaporte() != null ? usuario.getDniPasaporte() : "",
-                "telefono",      usuario.getTelefono() != null ? usuario.getTelefono() : ""
-        ));
+        // Devuelve UsuarioResponse — nunca expone el password
+        return ResponseEntity.ok(UsuarioResponse.from(usuario));
     }
 
     // ── Solo ADMIN ────────────────────────────────────────────
