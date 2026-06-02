@@ -49,7 +49,7 @@ public class AuthService {
                 .email(req.email())
                 .password(passwordEncoder.encode(req.password()))
                 .telefono(req.telefono())
-                .rol(Usuario.Rol.ADMIN)
+                .rol(req.rol())
                 .build();
 
         usuarioRepository.save(usuario);
