@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/paquetes/**").permitAll()      // ver tours sin login
                         .requestMatchers("/api/lugares/**").permitAll()       // ver lugares
                         .requestMatchers("/api/usuarios/perfil").authenticated()
+                        .requestMatchers("/api/tickets/**").authenticated()
 
                         // ── Solo ADMIN ────────────────────────────────────────
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
