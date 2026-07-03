@@ -33,4 +33,24 @@ public class AuthController {
             @Valid @RequestBody GoogleAuthRequest req) {
         return ResponseEntity.ok(googleAuthService.autenticarConGoogle(req.idToken()));
     }
+
+    @GetMapping("/runtime")
+    public String runtimeError() {
+        throw new RuntimeException("Error de prueba RuntimeException");
+    }
+
+    @GetMapping("/illegal-argument")
+    public String illegalArgument() {
+        throw new IllegalArgumentException("Parámetro inválido de prueba");
+    }
+
+    @GetMapping("/illegal-state")
+    public String illegalState() {
+        throw new IllegalStateException("Estado inválido de prueba");
+    }
+
+    @GetMapping("/security")
+    public String security() {
+        throw new SecurityException("Error de seguridad de prueba");
+    }
 }

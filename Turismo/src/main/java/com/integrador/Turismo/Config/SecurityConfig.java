@@ -1,6 +1,7 @@
 package com.integrador.Turismo.Config;
 
 
+import com.integrador.Turismo.Monitoring.filter.RequestLoggingFilter;
 import com.integrador.Turismo.Security.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +37,7 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final UserDetailsService userDetailsService;
+    private final RequestLoggingFilter requestLoggingFilter;
 
 
     @Bean
@@ -45,6 +47,13 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsSource()))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+
+                        // ── Actuator (Monitoreo) ───────────────────────────
+                        .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/actuator/info").permitAll()
+                        .requestMatchers("/actuator/metrics").permitAll()
+                        .requestMatchers("/actuator/prometheus").permitAll()
+                        .requestMatchers("/api/test").permitAll()
 
                         // ── Públicas ──────────────────────────────────────────
                         .requestMatchers("/api/auth/**").permitAll()          // login, register
@@ -62,7 +71,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authProvider())
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(requestLoggingFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -97,7 +107,7 @@ public class SecurityConfig {
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 }
